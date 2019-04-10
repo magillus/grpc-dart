@@ -132,7 +132,7 @@ class ClientConnection {
   void _connect() {
     if (_state != ConnectionState.idle &&
         _state != ConnectionState.transientFailure &&
-        !isOpen) {
+        isOpen) {
       return;
     }
     _setState(ConnectionState.connecting);
