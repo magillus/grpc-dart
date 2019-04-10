@@ -38,7 +38,10 @@ enum ConnectionState {
   idle,
 
   /// Shutting down, no further RPCs allowed.
-  shutdown
+  shutdown,
+
+  /// When underline http2 connection is not open anymore
+  inactive
 }
 
 /// A connection to a single RPC endpoint.
@@ -131,6 +134,7 @@ class ClientConnection {
 
   void _connect() {
     if (_state != ConnectionState.idle &&
+        _state != ConnectionState.inactive &&
         _state != ConnectionState.transientFailure) {
       return;
     }
@@ -155,7 +159,8 @@ class ClientConnection {
         break;
       default:
         _pendingCalls.add(call);
-        if (_state == ConnectionState.idle) {
+        if (_state == ConnectionState.idle ||
+            _state == ConnectionState.inactive) {
           _connect();
         }
     }
@@ -232,6 +237,7 @@ class ClientConnection {
     if (isActive) {
       _cancelTimer();
     } else {
+      _setState(ConnectionState.inactive);
       if (options.idleTimeout != null) {
         _timer ??= new Timer(options.idleTimeout, _handleIdleTimeout);
       }
@@ -266,7 +272,8 @@ class ClientConnection {
     _cancelTimer();
     _transport = null;
 
-    if (_state == ConnectionState.idle && _state == ConnectionState.shutdown) {
+    if (_state == ConnectionState.idle && _state == ConnectionState.shutdown &&
+        _state == ConnectionState.inactive) {
       // All good.
       return;
     }
