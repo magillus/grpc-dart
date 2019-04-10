@@ -16,7 +16,6 @@
 import 'dart:async';
 
 import '../shared/status.dart';
-
 import 'call.dart';
 import 'connection.dart';
 import 'method.dart';
@@ -66,6 +65,8 @@ class ClientChannel {
     if (_isShutdown) throw new GrpcError.unavailable('Channel shutting down.');
     return _connection ??= new ClientConnection(host, port, options);
   }
+
+  bool get isOpen => _connection?.isOpen ?? false;
 
   /// Initiates a new RPC on this connection.
   ClientCall<Q, R> createCall<Q, R>(

@@ -21,7 +21,6 @@ import 'package:http2/transport.dart';
 import 'package:meta/meta.dart';
 
 import '../shared/timeout.dart';
-
 import 'call.dart';
 import 'options.dart';
 
@@ -73,6 +72,8 @@ class ClientConnection {
   ClientConnection(this.host, this.port, this.options);
 
   ConnectionState get state => _state;
+
+  bool get isOpen => _transport?.isOpen ?? false;
 
   static List<Header> createCallHeaders(bool useTls, String authority,
       String path, Duration timeout, Map<String, String> metadata) {
