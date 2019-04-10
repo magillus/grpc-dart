@@ -119,8 +119,9 @@ class ClientConnection {
         throw 'Shutting down';
       }
     }
-    socket.done.then(_handleSocketClosed);
-    return new ClientTransportConnection.viaSocket(socket);
+    final incoming = socket.handleError((e, st) => _handleSocketClosed(),
+        test: (e) => true);
+    return new ClientTransportConnection.viaStreams(incoming, socket);
   }
 
   bool _validateBadCertificate(X509Certificate certificate) {
@@ -267,11 +268,11 @@ class ClientConnection {
     _connect();
   }
 
-  void _handleSocketClosed(_) {
+  void _handleSocketClosed() {
     _cancelTimer();
     _transport = null;
 
-    if (_state == ConnectionState.idle && _state == ConnectionState.shutdown) {
+    if (_state == ConnectionState.idle || _state == ConnectionState.shutdown) {
       // All good.
       return;
     }
