@@ -147,6 +147,10 @@ class ClientConnection {
   }
 
   void dispatchCall(ClientCall call) {
+    // reset connection if not open anymore
+    if (_state == ConnectionState.ready && !isOpen) {
+      _connect();
+    }
     switch (_state) {
       case ConnectionState.ready:
         _startCall(call);
@@ -156,7 +160,7 @@ class ClientConnection {
         break;
       default:
         _pendingCalls.add(call);
-        if (_state == ConnectionState.idle || !isOpen) {
+        if (_state == ConnectionState.idle) {
           _connect();
         }
     }
